@@ -1,0 +1,7 @@
+{
+  "port": 8080,
+  "enableSSL": false,
+  "sslPort": 8443,
+  "deployDir": "/Users/jeevan/Documents/Intrade/temp/python-deploy",
+  "logFileDir": "/Users/jeevan/Documents/Intrade/temp/python-deploy/logs"
+}
