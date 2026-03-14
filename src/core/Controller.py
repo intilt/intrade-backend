@@ -1,6 +1,6 @@
 import logging
 
-from config.Config import getBrokerAppConfig
+from appconfig.Config import getBrokerAppConfig
 from models.BrokerAppDetails import BrokerAppDetails
 from loginmgmt.ZerodhaLogin import ZerodhaLogin
 from loginmgmt.ICICIDirectLogin import ICICIDirectLogin
@@ -9,8 +9,8 @@ class Controller:
   brokerLogin = None # static variable
   brokerName = None # static variable
 
-  def handleBrokerLogin(args):
-    brokerAppConfig = getBrokerAppConfig()
+  def handleBrokerLogin(args, broker_name=None):
+    brokerAppConfig = getBrokerAppConfig(broker_name)
 
     brokerAppDetails = BrokerAppDetails(brokerAppConfig['broker'])
     brokerAppDetails.setClientID(brokerAppConfig['clientID'])

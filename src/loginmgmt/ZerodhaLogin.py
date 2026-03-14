@@ -1,7 +1,7 @@
 import logging
 from kiteconnect import KiteConnect
 
-from config.Config import getSystemConfig
+from appconfig.Config import getSystemConfig
 from loginmgmt.BaseLogin import BaseLogin
 
 class ZerodhaLogin(BaseLogin):

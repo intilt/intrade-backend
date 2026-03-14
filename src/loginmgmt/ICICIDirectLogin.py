@@ -3,7 +3,7 @@ import urllib
 from kiteconnect import KiteConnect
 from breeze_connect import BreezeConnect
 
-from config.Config import getSystemConfig
+from appconfig.Config import getSystemConfig
 from loginmgmt.BaseLogin import BaseLogin
 
 class ICICIDirectLogin(BaseLogin):

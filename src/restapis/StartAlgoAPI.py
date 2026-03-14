@@ -2,7 +2,7 @@ from flask.views import MethodView
 import json
 import logging
 import threading
-from config.Config import getSystemConfig
+from appconfig.Config import getSystemConfig
 from core.Algo import Algo
 
 class StartAlgoAPI(MethodView):

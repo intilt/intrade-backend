@@ -8,7 +8,7 @@ from urllib.request import urlopen
 from io import StringIO
 import pandas as pd
 
-from config.Config import getServerConfig, getTimestampsData, saveTimestampsData
+from appconfig.Config import getServerConfig, getTimestampsData, saveTimestampsData
 from core.Controller import Controller
 from utils.Utils import Utils
 

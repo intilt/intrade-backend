@@ -5,7 +5,7 @@ import logging
 import calendar
 from datetime import datetime, timedelta
 
-from config.Config import getHolidays
+from appconfig.Config import getHolidays
 from models.Direction import Direction
 from trademgmt.TradeState import TradeState
 

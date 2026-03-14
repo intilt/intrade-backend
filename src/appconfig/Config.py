@@ -11,8 +11,13 @@ def getSystemConfig():
     jsonSystemData = json.load(system)
     return jsonSystemData
 
-def getBrokerAppConfig():
-  with open('../config/brokerapp.json', 'r') as brokerapp:
+def getBrokerAppConfig(broker_name=None):
+  """Load broker config. broker_name 'icicidirect' uses brokerapp_icici.json, else brokerapp.json (zerodha)."""
+  if broker_name == 'icicidirect':
+    config_path = '../config/brokerapp_icici.json'
+  else:
+    config_path = '../config/brokerapp.json'
+  with open(config_path, 'r') as brokerapp:
     jsonUserData = json.load(brokerapp)
     return jsonUserData
 

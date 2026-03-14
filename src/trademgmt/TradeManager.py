@@ -4,7 +4,7 @@ import time
 import json
 from datetime import datetime
 
-from config.Config import getServerConfig
+from appconfig.Config import getServerConfig
 from core.Controller import Controller
 from ticker.ZerodhaTicker import ZerodhaTicker
 from ticker.ICICIDirectTicker import ICICIDirectTicker
