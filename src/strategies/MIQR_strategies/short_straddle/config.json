@@ -1,0 +1,19 @@
+[
+    {
+      "bar_duration": 5,
+      "alpha": "nifty_odte_short_gamma",
+      "strategy_name": "nifty_odte_sample_920_straddle",
+      "portfolio": "my_portfolio",
+      "strategy_config": {
+        "symbol": "NIFTY",
+        "exg": "NSE",
+        "maxpos": 1,
+        "entry_time": "092000",
+        "exit_time": "152000",
+        "sl_percentage": 0.20,
+        "buffer_percentage": 0.10,
+        "retry_duration": 30,
+        "retry_interval": 2
+      }
+    }
+  ]

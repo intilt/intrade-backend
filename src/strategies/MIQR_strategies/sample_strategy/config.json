@@ -1,0 +1,24 @@
+[
+    {
+    "bar_duration": 60,
+    "alpha": "sample_condor",
+    "strategy_name": "test_fn",
+    "portfolio": "raghav01",
+    "strategy_config": {
+        "symbol":"FINNIFTY",
+        "exg":"NSE",
+        "maxpos":2500
+        }
+    },
+    {
+    "bar_duration": 60,
+    "alpha": "sample_condor",
+    "strategy_name": "test_bn",
+    "portfolio": "raghav01",
+    "strategy_config": {
+        "symbol":"BANKNIFTY",
+        "exg":"NSE",
+        "maxpos":150
+        }
+    }
+]

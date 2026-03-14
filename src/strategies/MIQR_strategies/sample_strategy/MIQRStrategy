@@ -1,0 +1,141 @@
+from typing import List, Dict, Any, Union
+
+from logger import InstanceLogger
+from strategy import BaseStrategy
+from data_module.bardata import BarData
+
+class SampleStrategy(BaseStrategy):
+
+    def __init__(self, bar_duration: int, strategy_config: Dict):
+        super().__init__(bar_duration)
+        self.symbol = strategy_config["symbol"]
+        self.maxpos = strategy_config["maxpos"]
+        self.exg = strategy_config["exg"]
+        self.straddle = []
+        self.lastCondor = {"bcall": "", "scall": "", "sput": "", "bput": ""}
+        self.lastAtm1 = -1
+        self.lastAtm2 = -1
+        return
+
+    def checkAllCondition(self):
+        return
+
+    def updateBarAlpha(self, bar: List[BarData]):
+        my_bar: List[BarData] = []
+
+        for b in bar:
+            if b.contract.split("_")[1] == self.symbol:
+                my_bar.append(b)
+
+        expiry_date, expCode, atm1, atm2, lot_size = self.getMinExpAtm(my_bar)
+        self.mylog.info(f"{expiry_date = } {expCode = } {atm1 = } {atm2 = }")
+
+        if expiry_date != "20300101" and expCode != "-1" and atm1 != -1 and atm2 != -1:
+            currCondor = {
+                "bput": f"{self.exg}_{self.symbol}_{expCode}_P_{atm1 - abs(atm2 - atm1)}",
+                "sput": f"{self.exg}_{self.symbol}_{expCode}_P_{atm1}",
+                "scall": f"{self.exg}_{self.symbol}_{expCode}_C_{atm2}",
+                "bcall": f"{self.exg}_{self.symbol}_{expCode}_C_{atm2 + abs(atm2 - atm1)}"
+            }
+
+            self.tradeCondor(self.lastCondor, 0, my_bar)
+            self.tradeCondor(currCondor, self.maxpos, my_bar)
+            self.lastCondor = currCondor
+
+            if self.checkNewCondor(currCondor, self.lastCondor):
+                if not self.tradeCondor(self.lastCondor, 0, my_bar):
+                    self.tradeCondor(currCondor, self.maxpos * lot_size, my_bar)
+
+                self.lastCondor = currCondor
+            else:
+                self.lastCondor = {"bcall": "", "scall": "", "sput": "", "bput": ""}
+
+            self.logger.info(self.lastCondor)
+        return
+
+    def checkNewCondor(self, condor, lastCondor):
+        return any(condor[key] != lastCondor[key] for key in ["bcall", "scall", "bput", "sput"])
+
+    def tradeCondor(self, condor, tpos, bar: List[BarData]):
+        if any(condor[key] == "" for key in ["bcall", "scall", "sput", "bput"]):
+            return False
+
+        self._updateTargetPosition(condor["bcall"], tpos)
+        self._updateTargetPosition(condor["scall"], -tpos)
+        self._updateTargetPosition(condor["sput"], -tpos)
+        self._updateTargetPosition(condor["bput"], tpos)
+
+        if tpos != 0:
+            for b in bar:
+                if b.contract in condor.values():
+                    priceFactor = 0.02
+                    buySell = -1 if b.contract in [condor["bcall"], condor["bput"]] else 1
+                    miscDict = {}
+                    newTpos = tpos * -buySell
+                    newPrice = b.ltp
+
+                    while newPrice > 0 and newTpos != 0:
+                        self.logger.info(f"DEBUG {b.contract} {newPrice} {newTpos} {tpos} {b.ltp}")
+                        newTpos += b.lot_size * buySell
+                        newPrice = newPrice * (1 + buySell * priceFactor)
+
+                    miscDict[newPrice] = newTpos
+                    self.overWriteMiscDict(b.contract, miscDict)
+        else:
+            for key in ["bcall", "scall", "bput", "sput"]:
+                self.clearMiscDict(condor[key])
+
+        return True
+
+    def getMinExpAtm(self, bar: List[BarData]):
+        expiry = "20300101"
+        expCode = "-1"
+        atm1 = -1
+        atm2 = -1
+        lot_size = -1
+
+        for b in bar:
+            if b.expiry_date <= expiry:
+                expiry = b.expiry_date
+                expCode = b.contract.split("_")[2]
+
+                if len(b.contract.split("_")) > 3:
+                    strike_price = int(b.contract.split("_")[-1])
+                    lot_size = b.lot_size
+
+                    if b.atm1 == strike_price:
+                        atm1 = strike_price
+                    if b.atm2 == strike_price:
+                        atm2 = strike_price
+
+        if atm1 > atm2:
+            atm1, atm2 = atm2, atm1
+
+        return expiry, expCode, atm1, atm2, lot_size
+
+    def rmsCallBack(self, pos_map: Dict[str, Dict[str, Union[int, float]]]):
+        return
+
+    def onDayStart(self, curr_date: str):
+        super().onDayStart(curr_date)
+        self.mylog = InstanceLogger(f'./{self.strategy_name}.log', "INFO").getLogger()
+        return
+
+    def onDayEnd(self):
+        super().onDayEnd()
+        return
+
+    def getCurrentState(self) -> Dict[str, Any]:
+        return super().getCurrentState()
+
+    def setLastState(self, state):
+        super().setLastState(state)
+        return
+
+    def thriftCallBack(self, thriftDict: Dict[str, Any]):
+        try:
+            self.maxpos = int(thriftDict["maxPos"])
+            self.lastCondor = {"bcall": "", "scall": "", "sput": "", "bput": ""}
+        except Exception as e:
+            self.mylog.critical(f'THRIFT ERROR, error: {e}')
+        return
