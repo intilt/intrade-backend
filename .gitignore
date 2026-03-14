@@ -1,1 +1,4 @@
 *.pyc
+logs/*
+.DS_Store
+config/*
